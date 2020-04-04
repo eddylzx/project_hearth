@@ -1,5 +1,5 @@
 import speech_recognition as SR
-import nlp as parser
+import NLP as parser
 from punctuator import Punctuator
 
 # Initialize Punctuation Layer
