@@ -13,8 +13,8 @@
 # - Add datapoint to master dict (DONE)
 # - Add temporal considerations to data points (yesterday, today etc.)
 # - Figure out what other data we can add
-# - Export data to .csv or something so that Alay can use it
-# - Browse spacy examples
+# - Export data to .csv or something so that Alay can use it (DONE)
+# - Browse spacy examples 
 
 import spacy
 from spacy import displacy
