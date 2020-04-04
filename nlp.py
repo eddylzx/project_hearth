@@ -1,5 +1,5 @@
 # MIT COVID-19 Hackathon
-# Marcus Chu, Charles Tung Fang
+# Marcus Chu, Charles Tung Fang, Shih Bobin
 # 4/3/2020
 # The goal of this NLP one (as opposed to Josh's hard coded one) is that we won't know what we're looking for
 # so by identifying nouns and logging them into a dict, we can just keep expanding data categories 
@@ -9,8 +9,8 @@
 # python3 -m spacy download en_core_web_sm
 
 #TODO:
-# - Implement noun count pairs (via nummod dependencies)
-# - Add datapoint to master dict
+# - Implement noun count pairs (via nummod dependencies) (DONE)
+# - Add datapoint to master dict (DONE)
 # - Add temporal considerations to data points (yesterday, today etc.)
 # - Figure out what other data we can add
 # - Export data to .csv or something so that Alay can use it
@@ -18,9 +18,15 @@
 
 import spacy
 from spacy import displacy
+import csv
 
 nlp = None
 text = None
+
+textA = "Today I had 20 patients assigned to me, compared to yesterday’s 20. For each patient I spent an average of maybe 4 hours with, and they were all on ventilators, which we need more of. I also went through 2 masks today, I don’t know whether I will have enough to last through the week"
+textB = "I was assigned 40 patients today, 20 more than yesterday. I slept for 2 hours and worked from 19 hours. However 1 guy recovered today. 2 people passed away. I have been using the same mask for 2 weeks, and I only have 1 mask left. I am experiencing some symptons including coughing and sore throat, but I don't have time to rest."
+textC = "Coivd-19 ourbreak is unstoppable and threatening our life everyday. my mental health is at a 5. I would rate my physical health as 8. I do not have enough masks and 4 patients of mine passed-away this morning."
+textD = "61 people passed away today. I am very tired, I want to sleep. I only slept for 1 hour last night."
 
 master_dict = {} #key: list of data points
 
@@ -29,42 +35,75 @@ def setup(input_text):
     nlp = spacy.load("en_core_web_sm")
     text = nlp(input_text)
 
-def get_nouns():
-    global text
-    list_of_nouns = [chunk.text for chunk in text.noun_chunks]
-    print("Noun phrases:", list_of_nouns)
-    return list_of_nouns
+# def get_nouns():
+#     global text
+#     list_of_nouns = [chunk.text for chunk in text.noun_chunks]
+#     print("Noun phrases:", list_of_nouns)
+#     return list_of_nouns
 
-def get_verbs():
-    global text
-    list_of_verbs = [token.lemma_ for token in text if token.pos_ == "VERB"]
-    print("Verbs:", list_of_verbs)
-    return list_of_verbs
+# def get_verbs():
+#     global text
+#     list_of_verbs = [token.lemma_ for token in text if token.pos_ == "VERB"]
+#     print("Verbs:", list_of_verbs)
+#     return list_of_verbs
 
+# Get the noun count pairs using a hybrid of spaCy's nummod and NLP
 def get_noun_count_pairs():
-    # 1 case - Look for nummod dependencies
-    # Add data point to master_dict
-
     global text 
     global master_dict
-    nummod_dict = {}
-    for token in text: 
-        if token.dep_ == "nummod":
-            if (token not in nummod_dict):
-                nummod_dict[token.head.text] = token
-            else:
-                nummod_dict.get(token.head.text).append(token)
-
-    print("Nummod:", nummod_dict)
+    noun_count_dict = {}
     
-    for category in nummod_dict:
-        if (category not in master_dict):
-            master_dict[category] = nummod_dict.get(category)
-        else:
-            master_dict.get(category).append(nummod_dict.get(category))
+    # the verb of the current sentence
+    cur_verb = ""
+    # init key val variables
+    dict_key = ""
+    dict_val = ""
+    
+    # Using nummod dependency
+    for token in text:
+        # keep track of the verb of the current sentence
+        if token.pos_ == "VERB":
+            cur_verb = token.text
+            
+        # Reset key and value when reaching the end of a sentence 
+        # token is a conjuction or the start of a sentence -> renew dictionary key & value
+        if token.pos_ == "CCONJ" or token.sent_start:
+            dict_key = ""
+            dict_val = ""
+        
+        # Basic nummond operation to update key and val
+        if token.dep_ == "nummod":
+            dict_key = token.head.text
+            dict_val = token
 
-    print("Master Dict:", master_dict)
-    # pass
+        # append to noun count dictionary at the end of the sentence or middle of a sentence seperated by conjunction    
+        if token.text == '.' or token.pos_ == 'CCONJ':
+            # make key descriptive by adding current verb to the key
+            if '_' not in dict_key:
+                dict_key = cur_verb + "_" + dict_key
+            
+            if dict_key in noun_count_dict and dict_val:
+                noun_count_dict[dict_key].append(dict_val)
+            elif dict_val:
+                noun_count_dict[dict_key] = [dict_val]
+            
+            # renew noun count key and value after each append to the noun count dictionary 
+            dict_key = "" 
+            dict_val = ""
+        
+    print("Nummod:", noun_count_dict)
+
+    # export to csv file
+    tocsv(noun_count_dict)
+    
+    return noun_count_dict
+
+# helper function to export to csv file
+def tocsv(master_dict):
+    with open ('datapoints_noun_count_pairs.csv', mode = 'w') as wfile:
+        for key in master_dict.keys():
+            wfile.write("%s, %s\n" % (key, master_dict[key]))
+    
 
 # To view tree, go to: http://localhost:5000/
 def display_tree():
@@ -72,6 +111,7 @@ def display_tree():
     displacy.serve(text, style="dep")
 
 if __name__ == "__main__":
-    setup("Today I had 20 patients assigned to me, compared to yesterday’s 20. For each patient I spent an average of maybe 4 hours with, and they were all on ventilators, which we need more of. I also went through 2 masks today, I don’t know whether I will have enough to last through the week")
+    setup(textD)
     # display_tree()
     get_noun_count_pairs()
+    
