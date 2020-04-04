@@ -44,7 +44,27 @@ def get_verbs():
 def get_noun_count_pairs():
     # 1 case - Look for nummod dependencies
     # Add data point to master_dict
-    pass
+
+    global text 
+    global master_dict
+    nummod_dict = {}
+    for token in text: 
+        if token.dep_ == "nummod":
+            if (token not in nummod_dict):
+                nummod_dict[token.head.text] = token
+            else:
+                nummod_dict.get(token.head.text).append(token)
+
+    print("Nummod:", nummod_dict)
+    
+    for category in nummod_dict:
+        if (category not in master_dict):
+            master_dict[category] = nummod_dict.get(category)
+        else:
+            master_dict.get(category).append(nummod_dict.get(category))
+
+    print("Master Dict:", master_dict)
+    # pass
 
 # To view tree, go to: http://localhost:5000/
 def display_tree():
@@ -53,4 +73,5 @@ def display_tree():
 
 if __name__ == "__main__":
     setup("Today I had 20 patients assigned to me, compared to yesterday’s 20. For each patient I spent an average of maybe 4 hours with, and they were all on ventilators, which we need more of. I also went through 2 masks today, I don’t know whether I will have enough to last through the week")
-    display_tree()
+    # display_tree()
+    get_noun_count_pairs()
