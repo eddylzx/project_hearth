@@ -84,7 +84,7 @@ def display_tree():
     global text
     displacy.serve(text, style="dep")
 
-if __name__ == '__main__':
-    setup(textC)
-    extract_noun_verb()
-    #display_tree()
+# if __name__ == '__main__':
+#     setup(textC)
+#     # extract_noun_verb()
+#     #display_tree()

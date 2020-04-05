@@ -86,7 +86,7 @@ def get_noun_count_pairs():
             dict_key = "" 
             dict_val = ""
         
-    print("Nummod:", noun_count_dict)
+    # print("Nummod:", noun_count_dict)
 
     # export to csv file
     tocsv(noun_count_dict)
