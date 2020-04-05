@@ -30,18 +30,6 @@ def setup(input_text):
     nlp = spacy.load("en_core_web_sm")
     text = nlp(input_text)
 
-# def get_nouns():
-#     global text
-#     list_of_nouns = [chunk.text for chunk in text.noun_chunks]
-#     print("Noun phrases:", list_of_nouns)
-#     return list_of_nouns
-
-# def get_verbs():
-#     global text
-#     list_of_verbs = [token.lemma_ for token in text if token.pos_ == "VERB"]
-#     print("Verbs:", list_of_verbs)
-#     return list_of_verbs
-
 # Get the noun count pairs using a hybrid of spaCy's nummod and NLP
 def get_noun_count_pairs():
     global text 
@@ -86,7 +74,7 @@ def get_noun_count_pairs():
             dict_key = "" 
             dict_val = ""
         
-    # print("Nummod:", noun_count_dict)
+    print("Noun Count Dictionary:", noun_count_dict)
 
     # export to csv file
     tocsv(noun_count_dict)
@@ -104,3 +92,9 @@ def tocsv(master_dict):
 def display_tree():
     global text
     displacy.serve(text, style="dep")
+
+
+if __name__ == '__main__':
+    setup('One patient passed away today in the hospital because he didnt have a mask Ive, been taking care of this patient for days, Im very tired and need some sleep. I only had 5 hours of sleep last night and everyone else to have not much either I only have two masks left and are waiting for more masks to come.')
+    get_noun_count_pairs()
+    #display_tree()

@@ -47,7 +47,7 @@ def extract_noun_verb():
                     master_dict[token.lemma_] += 1
                 else:
                     master_dict[token.lemma_] = 1
-    print("master dict: ", master_dict)
+    print("master dictionary: ", master_dict)
     # gen_wordcloud(master_dict)
     # tocsv()
 
